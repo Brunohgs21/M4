@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import { ids, orders } from "./database";
 import {
   IWorkOrderRequest,
@@ -25,6 +25,29 @@ const validateDataOrder = (payload: any): IWorkOrderRequest => {
   }
   return payload;
 };
+
+// export const consolelogMiddleware = (
+//   request: Request,
+//   response: Response,
+//   next: NextFunction
+// ): Response | void => {
+//   console.log("Entrou no primeiro middleware");
+//   return next();
+// };
+
+// export const consoleLogRequestMiddleware = (
+//   request: Request,
+//   response: Response,
+//   next: NextFunction
+// ): Response | void => {
+//   console.log(request);
+//   if (request.body.status === undefined) {
+//     return response.status(400).json({
+//       message: "Status is undefined",
+//     });
+//   }
+//   return next();
+// };
 
 export const createWorkOrder = (
   request: Request,
@@ -71,4 +94,34 @@ export const listWorkOrders = (
   response: Response
 ): Response => {
   return response.json(orders);
+};
+
+export const retrieveWorkOrder = (
+  request: Request,
+  response: Response
+): Response => {
+  const indexWorkOrder: number = request.workOrder.indexWorkOrder;
+
+  return response.json(orders[indexWorkOrder]);
+};
+
+export const deleteWorkOrder = (
+  request: Request,
+  response: Response
+): Response => {
+  const indexWorkOrder: number = request.workOrder.indexWorkOrder;
+
+  orders.splice(indexWorkOrder, 1);
+
+  return response.status(204).send();
+};
+
+export const updateWorkOrder = (
+  request: Request,
+  response: Response
+): Response => {
+  const indexWorkOrder: number = request.workOrder.indexWorkOrder;
+  orders[indexWorkOrder] = { ...orders[indexWorkOrder], ...request.body };
+
+  return response.json(orders[indexWorkOrder]);
 };
