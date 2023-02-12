@@ -1,18 +1,21 @@
-export interface IWorkOrderRequest {
+import { QueryResult } from "pg";
+
+interface IWorkOrderRequest {
   description: string;
   mechanical: string;
-  client: string;
+  isWarranty: boolean;
+  status: string;
   price: number;
 }
 
-export interface IWorkOrder extends IWorkOrderRequest {
-  startDate: Date;
-  endDate: Date;
-  id: number;
+interface IWorkOrder extends IWorkOrderRequest {
+  startdate: Date;
+  enddate: Date;
+  id: Number;
 }
 
-export type WorkOrderRequiredKeys =
-  | "description"
-  | "mechanical"
-  | "client"
-  | "price";
+type WorkOrderCreate = Omit<IWorkOrder, "id">;
+
+type WorkOrderResult = QueryResult<IWorkOrder>;
+
+export { IWorkOrder, IWorkOrderRequest, WorkOrderResult, WorkOrderCreate };

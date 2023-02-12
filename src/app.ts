@@ -1,26 +1,17 @@
 import express, { Application } from "express";
-import {
-  createWorkOrder,
-  listWorkOrders,
-  retrieveWorkOrder,
-  deleteWorkOrder,
-  updateWorkOrder,
-} from "./logic";
-import { ensureWorkOrderExists } from "./middlewares";
+import { startDatabase } from "./database";
+import { createWorkOrder, createWorkOrderFormat, listWorkOrder } from "./logic";
 
 const app: Application = express();
 app.use(express.json());
 
 app.post("/work-order", createWorkOrder);
 
-app.get("/work-order", listWorkOrders);
+app.post("/work-order-format", createWorkOrderFormat);
 
-app.get("/work-order/:id", ensureWorkOrderExists, retrieveWorkOrder);
+app.get("/work-order", listWorkOrder);
 
-app.delete("/work-order/:id", ensureWorkOrderExists, deleteWorkOrder);
-
-app.patch("/work-order/:id", ensureWorkOrderExists, updateWorkOrder);
-
-app.listen(3000, () => {
+app.listen(3000, async () => {
+  await startDatabase();
   console.log("Server is running!");
 });

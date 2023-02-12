@@ -1,127 +1,99 @@
-import { NextFunction, Request, Response } from "express";
-import { ids, orders } from "./database";
+import { Request, Response } from "express";
+import { QueryConfig } from "pg";
+import format from "pg-format";
+import { client } from "./database";
 import {
-  IWorkOrderRequest,
   IWorkOrder,
-  WorkOrderRequiredKeys,
+  IWorkOrderRequest,
+  WorkOrderCreate,
+  WorkOrderResult,
 } from "./interfaces";
 
-const validateDataOrder = (payload: any): IWorkOrderRequest => {
-  const keys: Array<string> = Object.keys(payload);
-  const requiredKeys: Array<WorkOrderRequiredKeys> = [
-    "description",
-    "mechanical",
-    "client",
-    "price",
-  ];
-
-  const containsAllRequired: boolean = requiredKeys.every((key: string) => {
-    console.log(key);
-    return keys.includes(key);
-  });
-
-  if (!containsAllRequired) {
-    throw new Error(`Required keys are: ${requiredKeys}`);
-  }
-  return payload;
-};
-
-// export const consolelogMiddleware = (
-//   request: Request,
-//   response: Response,
-//   next: NextFunction
-// ): Response | void => {
-//   console.log("Entrou no primeiro middleware");
-//   return next();
-// };
-
-// export const consoleLogRequestMiddleware = (
-//   request: Request,
-//   response: Response,
-//   next: NextFunction
-// ): Response | void => {
-//   console.log(request);
-//   if (request.body.status === undefined) {
-//     return response.status(400).json({
-//       message: "Status is undefined",
-//     });
-//   }
-//   return next();
-// };
-
-export const createWorkOrder = (
+const createWorkOrder = async (
   request: Request,
-  response: Response
-): Response => {
-  try {
-    const orderData: IWorkOrderRequest = validateDataOrder(request.body);
+  respose: Response
+): Promise<Response> => {
+  const orderDataRequest: IWorkOrderRequest = request.body;
+  const orderData: WorkOrderCreate = {
+    ...orderDataRequest,
+    startdate: new Date(),
+    enddate: new Date(Date.now() + 86400 * 1000),
+  };
 
-    const id: number = Math.floor(Math.random() * 1000);
+  const queryString: string = `
+  INSERT INTO
+    work_orders(description, mechanical, price, status, iswarranty, startdate, enddate)
+  VALUES
+    ($1,$2,$3,$4,$5,$6,$7)
+  RETURNING *;
+  `;
+  const queryConfig: QueryConfig = {
+    text: queryString,
+    values: Object.values(orderData),
+  };
 
-    const idExists = ids.find((el) => el == id);
+  const queryResult: WorkOrderResult = await client.query(queryConfig);
+  const newWorkOrder: IWorkOrder = queryResult.rows[0];
 
-    if (idExists) {
-      return response.status(409).json({
-        message: "Id already exist, try again",
-      });
-    }
-
-    const newOrderData: IWorkOrder = {
-      id: id,
-      startDate: new Date(),
-      endDate: new Date(Date.now() + 86400 * 1000),
-      ...orderData,
-    };
-
-    ids.push(id);
-    orders.push(newOrderData);
-    return response.status(201).json(newOrderData);
-  } catch (error) {
-    if (error instanceof Error) {
-      return response.status(400).json({
-        message: error.message,
-      });
-    }
-    console.log(error);
-    return response.status(500).json({
-      message: "Internal server error",
-    });
-  }
+  return respose.status(201).json(newWorkOrder);
 };
 
-export const listWorkOrders = (
+const createWorkOrderFormat = async (
   request: Request,
-  response: Response
-): Response => {
-  return response.json(orders);
+  respose: Response
+): Promise<Response> => {
+  const orderDataRequest: IWorkOrderRequest = request.body;
+  const orderData: WorkOrderCreate = {
+    ...orderDataRequest,
+    startdate: new Date(),
+    enddate: new Date(Date.now() + 86400 * 1000),
+  };
+
+  const queryString: string = format(
+    `
+  INSERT INTO
+    work_orders(%I)
+  VALUES
+    (%L)
+  RETURNING *;
+  `,
+    Object.keys(orderData),
+    Object.values(orderData)
+  );
+
+  const queryResult: WorkOrderResult = await client.query(queryString);
+  const newWorkOrder: IWorkOrder = queryResult.rows[0];
+
+  return respose.status(201).json(newWorkOrder);
 };
 
-export const retrieveWorkOrder = (
+const listWorkOrder = async (
   request: Request,
-  response: Response
-): Response => {
-  const indexWorkOrder: number = request.workOrder.indexWorkOrder;
+  respose: Response
+): Promise<Response> => {
+  const per_page =
+    request.query.per_page === undefined ? 10 : request.query.per_page;
+  let page = request.query.page === undefined ? 0 : request.query.page;
 
-  return response.json(orders[indexWorkOrder]);
+  console.log(page, per_page);
+
+  const queryString: string = `
+    SELECT 
+	    *
+    FROM 
+	    work_orders
+    LIMIT $1 OFFSET $2;
+    `;
+
+  const queryConfig: QueryConfig = {
+    text: queryString,
+    values: [per_page, page],
+  };
+
+  const queryResult: WorkOrderResult = await client.query(queryConfig);
+
+  return respose.status(200).json(queryResult.rows);
 };
 
-export const deleteWorkOrder = (
-  request: Request,
-  response: Response
-): Response => {
-  const indexWorkOrder: number = request.workOrder.indexWorkOrder;
-
-  orders.splice(indexWorkOrder, 1);
-
-  return response.status(204).send();
-};
-
-export const updateWorkOrder = (
-  request: Request,
-  response: Response
-): Response => {
-  const indexWorkOrder: number = request.workOrder.indexWorkOrder;
-  orders[indexWorkOrder] = { ...orders[indexWorkOrder], ...request.body };
-
-  return response.json(orders[indexWorkOrder]);
-};
+export { createWorkOrder, createWorkOrderFormat, listWorkOrder };
+6;

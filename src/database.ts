@@ -1,4 +1,16 @@
-import { IWorkOrder } from "./interfaces";
+import { Client } from "pg";
 
-export const orders: Array<IWorkOrder> = [];
-export const ids: Array<number> = [];
+const client: Client = new Client({
+  user: "bruno",
+  password: "1234",
+  host: "localhost",
+  database: "demo",
+  port: 5432,
+});
+
+const startDatabase = async (): Promise<void> => {
+  await client.connect();
+  console.log("Database connected!");
+};
+
+export { client, startDatabase };
