@@ -71,11 +71,11 @@ const listWorkOrder = async (
   request: Request,
   respose: Response
 ): Promise<Response> => {
-  const per_page =
-    request.query.per_page === undefined ? 10 : request.query.per_page;
-  let page = request.query.page === undefined ? 0 : request.query.page;
+  const perPage: any =
+    request.query.perPage === undefined ? 10 : request.query.perPage;
+  let page: any = request.query.page === undefined ? 0 : request.query.page;
 
-  console.log(page, per_page);
+  page = page * perPage;
 
   const queryString: string = `
     SELECT 
@@ -87,7 +87,7 @@ const listWorkOrder = async (
 
   const queryConfig: QueryConfig = {
     text: queryString,
-    values: [per_page, page],
+    values: [perPage, page],
   };
 
   const queryResult: WorkOrderResult = await client.query(queryConfig);
@@ -95,5 +95,88 @@ const listWorkOrder = async (
   return respose.status(200).json(queryResult.rows);
 };
 
-export { createWorkOrder, createWorkOrderFormat, listWorkOrder };
-6;
+const retrieveWorkOrder = async (
+  request: Request,
+  response: Response
+): Promise<Response> => {
+  const id: number = parseInt(request.params.id);
+
+  const queryString: string = `
+    SELECT
+        *
+    FROM
+        work_orders
+    WHERE
+        id = $1;
+  `;
+
+  const queryConfig: QueryConfig = {
+    text: queryString,
+    values: [id],
+  };
+
+  const queryResult: WorkOrderResult = await client.query(queryConfig);
+
+  return response.json(queryResult.rows[0]);
+};
+
+const deleteWorkOrder = async (
+  request: Request,
+  response: Response
+): Promise<Response> => {
+  const id: number = parseInt(request.params.id);
+
+  const queryString: string = `
+    DELETE FROM
+        work_orders
+    WHERE
+      id = $1;
+  `;
+
+  const queryConfig: QueryConfig = {
+    text: queryString,
+    values: [id],
+  };
+
+  return response.status(204).send();
+};
+
+const updateWorkOrder = async (
+  request: Request,
+  response: Response
+): Promise<Response> => {
+  const id: number = parseInt(request.params.id);
+  const orderData = Object.values(request.body);
+
+  const queryString: string = `
+      UPDATE
+          work_orders
+      SET
+          description = $1,
+          mechanical = $2,
+          price = $3,
+          status = $4,
+          iswarranty = $5
+      WHERE
+          id = $6
+      RETURNING *;
+  `;
+
+  const queryConfig: QueryConfig = {
+    text: queryString,
+    values: [...orderData, id],
+  };
+
+  const queryResult: WorkOrderResult = await client.query(queryConfig);
+
+  return response.json(queryResult.rows[0]);
+};
+
+export {
+  createWorkOrder,
+  createWorkOrderFormat,
+  listWorkOrder,
+  retrieveWorkOrder,
+  deleteWorkOrder,
+  updateWorkOrder,
+};
