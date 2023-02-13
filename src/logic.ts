@@ -172,6 +172,46 @@ const updateWorkOrder = async (
   return response.json(queryResult.rows[0]);
 };
 
+const partialUpdateWorkOrder = async (
+  request: Request,
+  response: Response
+): Promise<Response> => {
+  if (request.body.id) {
+    delete request.body["id"];
+  }
+
+  const id: number = parseInt(request.params.id);
+  const orderData = Object.values(request.body);
+  const orderKeys = Object.keys(request.body);
+
+  const formatString: string = format(
+    `
+      UPDATE
+          work_orders
+      SET(%I) = ROW(%L)
+      WHERE
+          id = $1
+      RETURNING *;
+  `,
+    orderKeys,
+    orderData
+  );
+
+  const queryConfig: QueryConfig = {
+    text: formatString,
+    values: [id],
+  };
+
+  try {
+    const queryResult: WorkOrderResult = await client.query(queryConfig);
+    return response.json(queryResult.rows[0]);
+  } catch (error) {
+    return response.status(400).json({
+      message: "Wrong keys!",
+    });
+  }
+};
+
 export {
   createWorkOrder,
   createWorkOrderFormat,
@@ -179,4 +219,5 @@ export {
   retrieveWorkOrder,
   deleteWorkOrder,
   updateWorkOrder,
+  partialUpdateWorkOrder,
 };

@@ -5,6 +5,7 @@ import {
   createWorkOrderFormat,
   deleteWorkOrder,
   listWorkOrder,
+  partialUpdateWorkOrder,
   retrieveWorkOrder,
   updateWorkOrder,
 } from "./logic";
@@ -24,6 +25,8 @@ app.get("/work-order/:id", ensureWorkOrderExists, retrieveWorkOrder);
 app.delete("/work-order/:id", ensureWorkOrderExists, deleteWorkOrder);
 
 app.put("/work-order/:id", ensureWorkOrderExists, updateWorkOrder);
+
+app.patch("/work-order/:id", ensureWorkOrderExists, partialUpdateWorkOrder);
 
 app.listen(3000, async () => {
   await startDatabase();
