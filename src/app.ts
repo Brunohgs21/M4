@@ -1,32 +1,23 @@
 import express, { Application } from "express";
+
 import { startDatabase } from "./database";
 import {
-  createWorkOrder,
-  createWorkOrderFormat,
-  deleteWorkOrder,
-  listWorkOrder,
-  partialUpdateWorkOrder,
-  retrieveWorkOrder,
-  updateWorkOrder,
-} from "./logic";
-import { ensureWorkOrderExists } from "./middlewares";
+  createMechanical,
+  createMechanicalAddress,
+  retrieveMechanical,
+} from "./logics/mechanicals.logics";
+import { ensureMechanicalExists } from "./middlewares/mechanicals.middlewares";
 
 const app: Application = express();
 app.use(express.json());
 
-app.post("/work-order", createWorkOrder);
-
-app.post("/work-order-format", createWorkOrderFormat);
-
-app.get("/work-order", listWorkOrder);
-
-app.get("/work-order/:id", ensureWorkOrderExists, retrieveWorkOrder);
-
-app.delete("/work-order/:id", ensureWorkOrderExists, deleteWorkOrder);
-
-app.put("/work-order/:id", ensureWorkOrderExists, updateWorkOrder);
-
-app.patch("/work-order/:id", ensureWorkOrderExists, partialUpdateWorkOrder);
+app.post("/mechanics", createMechanical);
+app.post(
+  "/mechanics/:id/addresses",
+  ensureMechanicalExists,
+  createMechanicalAddress
+);
+app.get("/mechanics/:id", ensureMechanicalExists, retrieveMechanical);
 
 app.listen(3000, async () => {
   await startDatabase();
