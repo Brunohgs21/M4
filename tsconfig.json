@@ -13,7 +13,7 @@
     "src/*",
     "src/database/index.ts",
     "src/logics/mechanicals.logics.ts",
-    "src/interfaces/interfaces.ts",
+    "src/interfaces/mechanics.interfaces.ts",
     "src/middlewares/mechanicals.middlewares.ts",
     "src/app.ts"
   ],

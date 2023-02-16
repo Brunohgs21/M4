@@ -8,7 +8,7 @@ import {
   IMechanicalRequest,
   MechanicalAddressResult,
   MechanicalResult,
-} from "../interfaces/interfaces";
+} from "../interfaces/mechanics.interfaces";
 
 const createMechanical = async (
   req: Request,
