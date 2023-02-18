@@ -8,9 +8,11 @@ import {
 } from "./logics/mechanics.logics";
 import { ensureMechanicalExists } from "./middlewares/mechanicals.middlewares";
 import {
+  createPartsInWorkOrder,
   createWorkOrders,
   finishWorkOrders,
   listWorkOrders,
+  listWorkOrdersParts,
 } from "./logics/workOrders.logics";
 
 const app: Application = express();
@@ -27,6 +29,8 @@ app.get("/mechanics/:id", ensureMechanicalExists, retrieveMechanical);
 app.post("/workOrders", createWorkOrders);
 app.get("/workOrders", listWorkOrders);
 app.patch("/workOrders/:id/finish", finishWorkOrders);
+app.post("/workOrders/:id/parts", createPartsInWorkOrder);
+app.get("/workOrders/:id/parts", listWorkOrdersParts);
 
 app.listen(3000, async () => {
   await startDatabase();
