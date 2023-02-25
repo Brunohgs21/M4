@@ -9,13 +9,6 @@
     "exactOptionalPropertyTypes": true,
     "skipLibCheck": true
   },
-  "include": [
-    "src/*",
-    "src/database/index.ts",
-    "src/logics/mechanicals.logics.ts",
-    "src/interfaces/mechanics.interfaces.ts",
-    "src/middlewares/mechanicals.middlewares.ts",
-    "src/app.ts"
-  ],
+  "include": ["src/*", "src/app.ts"],
   "exclude": ["node_modules"]
 }
