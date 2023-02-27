@@ -1,8 +1,12 @@
-import client from "./connection";
+import { Client } from "pg";
+import "dotenv/config";
 
-const connectDatabase = async (): Promise<void> => {
-  await client.connect();
-  console.log("Database is connected!");
-};
+const client: Client = new Client({
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  host: process.env.DB_HOST,
+  port: parseInt(process.env.DB_PORT!),
+  database: process.env.DB,
+});
 
-export default connectDatabase;
+export default client;
