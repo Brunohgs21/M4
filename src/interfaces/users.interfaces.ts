@@ -1,5 +1,6 @@
 import { QueryResult } from "pg";
 import {
+  allUsersSchema,
   createUserSchema,
   returnUserSchema,
   returnUserSchemaWithoutPassword,
@@ -11,5 +12,14 @@ type IUser = z.infer<typeof returnUserSchema>;
 
 type IUserWithoutPassword = Omit<IUser, "password">;
 type IUserResult = QueryResult<IUserWithoutPassword>;
+type IUserResultWithPassword = QueryResult<IUser>;
+type IAllUsersReturn = z.infer<typeof allUsersSchema>;
 
-export { IUserRequest, IUser, IUserWithoutPassword, IUserResult };
+export {
+  IUserRequest,
+  IUser,
+  IUserWithoutPassword,
+  IUserResult,
+  IAllUsersReturn,
+  IUserResultWithPassword,
+};

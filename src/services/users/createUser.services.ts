@@ -7,10 +7,7 @@ import { client } from "../../database";
 import format from "pg-format";
 import { QueryConfig, QueryResult } from "pg";
 import { AppError } from "../../errors";
-import {
-  createUserSchema,
-  returnUserSchemaWithoutPassword,
-} from "../../schemas/users.schemas";
+import { returnUserSchemaWithoutPassword } from "../../schemas/users.schemas";
 
 const createUsersService = async (
   userData: IUserRequest
